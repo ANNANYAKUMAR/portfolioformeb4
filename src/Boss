@@ -1,0 +1,46 @@
+class Boss 
+ // member variables
+ int x, y, health, dia, speed, rad;
+ color c;
+ char displaymode;
+ PImage boss;
+ 
+ // Constructor
+ Boss (int x, int y) {
+   this.x = x;
+   this.y = y;
+   c = #C90AFF;
+   health = 40;
+   displaymode = '1';
+   dia = 40;
+   speed = int(random(3, 7));
+   boss = loadimage("asteroid.png");
+   rad=100;
+ }
+ 
+ // Lazer Vs Asteroid Intersection
+   boolean lazerIntersection(Lazer=l) {
+     float distance = dist(x, y, l.x, l.y);
+     if (distance < rad+l.rad+1) {
+       return true;
+     }  else  {
+       return false;
+     }
+   }
+   
+   boolean rechBottom() {
+     if (y > height) {
+       return true;
+     }  else  {
+       return false;
+    }
+   }
+   
+   void display() {
+     fill(c);
+     image(boss, x, y+40, rad, rad);
+     
+   }
+   
+
+   
