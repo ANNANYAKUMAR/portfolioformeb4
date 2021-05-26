@@ -1,0 +1,160 @@
+// SpaceGame | Dec 2020
+// by Annanya Kumar
+
+import processing.sound.*;
+SoundFile lazer;
+SpaceShip s1;
+ArrayList<Lazer> lazers;
+ArrayList<Asteroid> asteroids;
+ArrayList<Star> stars;
+Timer timer;
+int pass, score;
+boolean play;
+
+void setup() {
+  size(800, 500);
+  lazers = new SoundFile(this, "Blaster-Imperial.wav");
+  s1 = new SpaceShip(#120852);
+  lazers = new ArrayList();
+  asteroids = new ArrayList();
+  stars = new ArrayList();
+  timer = new Timer(int(random(500, 3000)));
+  pass=0;
+  play=false;
+  score = 0;
+  timer.start();
+}
+void draw() {
+  noCursor();
+
+  //Play
+  if (!play) {
+    startScreen();
+  } else {
+
+
+    background(0);
+    stars. add(new Star(int(random(width)), int(random(height))));
+    for (int i = 0; i < stars.size(); i++) {
+      Star star = stars.get(i);
+      star.display();
+      star.move();
+      if (star. reachBottom()) {
+        stars.remove(star);
+      }
+    }
+
+
+    if (timer.isFinished()) {
+      asteroids.add(new Asteroid(int(random(width)), -70));
+      timer.start();
+    }
+
+    for (int i = 0; i < asteroids.size(); i++) {
+      Asteroid asteroid = asteroids. get(i);
+      asteroid.move();
+
+      //Collision between the Asteroid and Spaceship
+
+      if (s1.asteroidIntersection(asteroid));{
+      asteroids.remove(asteroids);
+      s1.health-=asteroid.health;
+      score+=50;
+    }
+
+    if (Asteroid.reachBottom()) {
+      asteroids.remove(asteroids);
+    }
+  }
+
+    for (int i = 0; i < lazers.size(); i++) {
+      Lazer lazer = lazers.get(i);
+      lazer.display();
+      lazer.fire();
+
+      //Detect asteroid collision
+
+      for (int a = 0; a < asteroids.size(); a++) {
+        Asteroid asteroid =asteroids.get(a);
+        if (asteroid.asteroidIntersection(lazer)) {
+          lazers.remove(lazer);
+          score+= 8;
+          asteroid.health-=lazer.power;
+          if (asteroid.health<1) {
+            asteroids.remove(asteroid);
+            score+=asteroid.health;
+          }
+        }
+      }
+
+
+      if (lazer.reachTop()) {
+        lazers.remove(lazer);
+      }
+    }
+
+   {
+     infoPannel();
+    s1.display(mouseX, mouseY);
+    // GameOver Logic
+    if (s1.health<1 || pass>10) {
+
+      play = false;
+      gameOver()
+    }
+  } 
+}
+  
+
+  void mousePressed() {
+    if (play) {
+      lazer.play();
+      if (s1.ammo>0);
+    }
+    {
+      
+ 
+ lazers.add(new Lazer(s1.x, s1.y));
+
+  s1.ammo++;
+    }
+  }
+
+
+void infoPannel() {
+  fill(130, 130);
+  rectMode(CORNER);
+  rect(0, height-50, width, 50);
+  fill(255, 128);
+  //text("Health:") + s1.health, 20, height-20);
+  //text("Lives:") + s1.health, 130, height-20);
+  //text("Ammo:") + s1.health, 210, height-20);
+  if (pass > 7) {
+    fill(255, 0, 0);
+  }
+  text ("Pass" + pass, 420, height-30);
+  //text ("Level" + level, 310, height-20);
+  //text ("Score" + score, 370, height-20);
+}
+
+
+void startScreen() {
+  background(0);
+  text("Hello!", width/2, height/2);
+  text("Click to start the game...", width/2, height/2+20);
+  text("Hope You Enjoy the Game!", width/2, height/40);
+
+  if (mousePressed) {
+    play = true;
+  }
+}
+
+void gameOver() {
+  background(0);
+  textAlign(CENTER);
+  fill(222);
+  text("GameOver", width/2, height/2);
+  text("Nice Try!", width/2, height/2+20);
+  text("Play Again!", width/2, height/2+40);
+  noLoop();
+}
