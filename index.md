@@ -12,7 +12,7 @@ An OPP space shooter game made in 2020.
 
 ![SpaceGame Class Diagram](https://user-images.githubusercontent.com/70349676/120361845-96d8c080-c2c7-11eb-9bda-fa6acfbac171.png)
 
-SpaceGame-Made in December 2020
+SpaceGame Final Project-Made in December 2020
 
 Graphics produced and tested in Processing 
 
