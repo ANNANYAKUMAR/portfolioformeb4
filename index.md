@@ -52,6 +52,7 @@ Calculator App. This app can be used for any simple mathematic calculations.
 
 <img width="211" alt="calculator" src="https://user-images.githubusercontent.com/70349676/120687772-93783d00-c45f-11eb-80e5-e6f6cc418de5.png">
 
+Credit: Designed around the apple phone calculator.
 
 
 
