@@ -7,154 +7,343 @@ SpaceShip s1;
 ArrayList<Lazer> lazers;
 ArrayList<Asteroid> asteroids;
 ArrayList<Star> stars;
-Timer timer;
-int pass, score;
+ArrayList<EnemyShip> eship;
+ArrayList<PowerUp> pUps;
+Timer asteroidtimer, enemyshipTimer, puTimer;
+Ship ship;
+int pass, asteroidRate, level, asteroidRate, lazerCount, score, weaponCount, enemyHealth, superWeapon;
 boolean play;
+String ticTest;
+boolean ticker;
 
 void setup() {
-  size(800, 500);
-  lazers = new SoundFile(this, "Blaster-Imperial.wav");
-  s1 = new SpaceShip(#120852);
-  lazers = new ArrayList();
+  size(1000, 800); 
+  lazers = new SoundFile(this, "fire2.wav");
   asteroids = new ArrayList();
   stars = new ArrayList();
-  timer = new Timer(int(random(500, 3000)));
-  pass=0;
-  play=false;
+  enemies = new ArrayList();
+  lazers = new ArrayList();
+  elazers = new ArrayList();
+  pUps = new ArrayList();
+  ship = new Ship();
+  asteroidRate = 700;
+  asteroidTimer = new Timer(asteroidRate);
+  enemyTimer = new Timer(3000);
+  puTimer = new Timer(3000);
+  pass = 0;
+  level = 1;
+  asteroidCount = 0;
+  lazerCount = 0;
   score = 0;
-  timer.start();
+  weaponCount = 1;
+  enemyHealth = 100;
+  superWeapon = 0;
+  play = false;
+  ticText = "";
+  ticTimer = newTimer(2000);
+  ticker = false;
+  asteroidTimer.start();
+  puTimer.start();
 }
+
 void draw() {
   noCursor();
-
-  //Play
+    //Play
   if (!play) {
     startScreen();
   } else {
-
-
-    background(0);
-    stars. add(new Star(int(random(width)), int(random(height))));
+    background(12);
+    // Level Handling
+    if (frameCount % 1000 == 10) {
+      level++;
+      if superWeapon > 0) {
+        ticText = "Level:" + level + "And Super Weapon is ready!";
+      } else {
+        ticText = "Level:" + level;
+      }
+      
+      ticker();
+      asteroidRate-=90;
+      enemyHealth+=100;
+      asteroidTimer.totalTime= asteroidRate;
+    }
+    
+    // Starfield Simulation and Disposal
+    stars.add(new Star(int(random(width)), 0));
     for (int i = 0; i < stars.size(); i++) {
       Star star = stars.get(i);
-      star.display();
       star.move();
-      if (star. reachBottom()) {
+      star.display();
+      if (star.reachedBottom()) {
         stars.remove(star);
       }
     }
-
-
-    if (timer.isFinished()) {
-      asteroids.add(new Asteroid(int(random(width)), -70));
-      timer.start();
+    
+    // enemy ship firing
+    for (int i = 0; i < enemies.size(); i++) {
+      Enemy enemy = enemies.get(i);
+      enemy.move();
+      enemy.display();
+      
+      // enemy and ship intersection
+      if (ship.shipIntersect(enemy)) {
+        ship.health-=10;
+        score+=enemy.healthStart;
+        enemies.remove(enemy);
+      }
+      if (enemy.is Finished()) {
+        elazer.add(new Enemylazer (enemy.x, enemy.y));
+        enemy.start();
+      }
     }
-
-    for (int i = 0; i < asteroids.size(); i++) {
-      Asteroid asteroid = asteroids. get(i);
+    
+    // enemy lazer rendering
+    for (int i = elazers.size()-1; i>=0; i==) {
+      EnemyLazer elazer = (EnemyLazer) elazer.get(i);
+      elazer.fire();
+      elazer.display();
+      
+      // Enemy Lazer vs. Ship
+      if (ship.enemyLazerIntersect(elazer)) {
+        ship.health-=elazer.power;
+        elazers.remove(elazer);
+      }
+      if (elazer.reachedBottom()) {
+        elazers.remove(elazers);
+      }
+    }
+    
+    // Asteroid Distribution
+    if (asteroidTimer.isFinished()) {
+      asteroids.add(new Asteroid(int(random(width)), -20));
+      asteroidCount++;
+      asteroidTimer.start();
+    }
+    
+    
+    // asteroid rendering and collision
+    for (int i = 0; i < asteroid.size(); i++) {
+      Asteroid asteroid = asteroids.get(i);
       asteroid.move();
-
-      //Collision between the Asteroid and Spaceship
-
-      if (s1.asteroidIntersection(asteroid));{
-      asteroids.remove(asteroids);
-      s1.health-=asteroid.health;
-      score+=50;
-    }
-
-    if (Asteroid.reachBottom()) {
-      asteroids.remove(asteroids);
-    }
-  }
-
-    for (int i = 0; i < lazers.size(); i++) {
-      Lazer lazer = lazers.get(i);
-      lazer.display();
-      lazer.fire();
-
-      //Detect asteroid collision
-
-      for (int a = 0; a < asteroids.size(); a++) {
-        Asteroid asteroid =asteroids.get(a);
-        if (asteroid.asteroidIntersection(lazer)) {
-          lazers.remove(lazer);
-          score+= 8;
-          asteroid.health-=lazer.power;
-          if (asteroid.health<1) {
-            asteroids.remove(asteroid);
-            score+=asteroid.health;
-          }
+      asteroid.display();
+      
+      // asteroid and ship intersection
+      if (ship.asteroidIntersect(asteroid)) {
+        ship.health-=asteroid.health;
+        if (asteroid.health<1) {
+          score+=asteroid.healthStart;
+          asteroids.remove(asteroid);
         }
       }
-
-
-      if (lazer.reachTop()) {
-        lazers.remove(lazer);
+      
+      //Disposal of asteroids
+      if (asteroid.reachedBottom()) {
+        pass++;
+        asteroids.remove(asteroid)
+      }
+    }
+           
+           // Lazers display and Disposal
+      for (int i = 0; i < lazers.size() i++) {
+        Lazer lazer = (lazer) lazers.get(i);
+        lazer.fire();
+        lazer.display();
+        
+        // asteroid and lazer intersection
+        for (int j = 0; j < asteroid.size(); j++) {
+          Asteroid asteroid = asteroid.get(j);
+          if (asteroid.lazerIntersect(lazer)) {
+            lazers.remove(lazer);
+            asteroid.health-=10;
+            if (asteroid.health < 1) {
+              score+=asteroid.healthStart;
+              asteroids.remove(asteroid);
+            }
+          }
+        }
+        
+        // enemy ship and lazer intersection
+        for (int k = 0; k < enemies.size(); k++) {
+          Enemy enemy = enemies.get(k);
+          if (enemy.lazerIntersect(lazer)) {
+            lazers.remove(lazer);
+            enemy.health-=20;
+            if (enemy.health < 1) {
+              score+=enemy.healthStart;
+              enemies.remove(enemy);
+            }
+          }
+        }
+        
+        //Disposal of Lazers
+        if  (lazer.reachedTop()) {
+          lazers.remove(lazer);
+        }
+      }
+      
+      //PowerUp Distribution
+      if (puTimer.isFinished()) {
+        pUps.add(new PowerUp(int(random(width)), -20));
+        puTimer.start();
+      }
+      
+      //PowerUp rendering and collision detection
+      for (int i = 0; i < pUps.size(); i++) {
+        PowerUp pu = pUps.get(i);
+        pu.move();
+        pu.display();
+        
+        // PowerUp and ship intersection
+        if (ship.puIntersect(pu)) {
+          
+          // Apply PowerUp Effects
+          if (pu.pu == 0) {
+            ship.ammo+=1000;
+          } else if (pu.pu == 1) {
+            ship.health+=100;
+          } else if (pu.pu == 2) {
+            weaponCount++;
+          } else if (pu.pu == 3) {
+            superWeapon++;
+          }
+          pUps.remove(pu);
+        }
+        
+        
+        //Dispose Asteroids
+        of (pu.reachedBottom()) {
+         pUps.remove(pu);
+        }
+      }
+      
+      // Display Ship
+      ship.display(mouseX, mouseY);
+      
+      // Display Tic Text
+      if (ticker) {
+        if (!ticTimer.isFinished()) {
+          fill (255, 190);
+          textSize(40);
+          textAlign(CENTER);
+          text(ticText, width/2, height/2);
+        } else if  (!ticTimer.isFinished() && ship.health < 30) {
+          fill(255, 190);
+          textSize(40);
+          textAlign(CENTER);
+          text(ticText, width/2, height/2);
+        }
+      }
+      
+      infoPanel();
+      
+      // GameOver Logic
+      if (ship.health < 1 || pass > 100) {
+        play = false;
+        gameOver();
       }
     }
 
-   {
-     infoPannel();
-    s1.display(mouseX, mouseY);
-    // GameOver Logic
-    if (s1.health<1 || pass>10) {
-
-      play = false;
-      gameOver()
-    }
-  } 
-}
-  
-
-  void mousePressed() {
-    if (play) {
-      lazer.play();
-      if (s1.ammo>0);
-    }
-    {
-      
- 
- lazers.add(new Lazer(s1.x, s1.y));
-
-  s1.ammo++;
-    }
-  }
-
-
-void infoPannel() {
-  fill(130, 130);
-  rectMode(CORNER);
-  rect(0, height-50, width, 50);
-  fill(255, 128);
-  //text("Health:") + s1.health, 20, height-20);
-  //text("Lives:") + s1.health, 130, height-20);
-  //text("Ammo:") + s1.health, 210, height-20);
-  if (pass > 7) {
-    fill(255, 0, 0);
-  }
-  text ("Pass" + pass, 420, height-30);
-  //text ("Level" + level, 310, height-20);
-  //text ("Score" + score, 370, height-20);
-}
-
-
-void startScreen() {
-  background(0);
-  text("Hello!", width/2, height/2);
-  text("Click to start the game...", width/2, height/2+20);
-  text("Hope You Enjoy the Game!", width/2, height/40);
-
-  if (mousePressed) {
-    play = true;
-  }
-}
-
-void gameOver() {
-  background(0);
-  textAlign(CENTER);
-  fill(222);
-  text("GameOver", width/2, height/2);
-  text("Nice Try!", width/2, height/2+20);
-  text("Play Again!", width/2, height/2+40);
-  noLoop();
-}
+     void mouseReleased() {
+       if (mouseButton == RIGHT && superWeapon > 0) { 
+         superWeapon--;
+         pass = 0;
+         weaponCount = 1;
+         enemyHealth = 1;
+         asteroidRate = 1000;
+         asteroidTimer.totalTime = asteroidRate;
+         for (int i = 0l i < asteroid.size(); i++) {
+           Asteroid asteroid = asteroids.get(i);
+           score+asteroid.healthStart;
+           asteroids.remove(asteroid);
+           asteroidCount++;
+         }
+          enemies.removeAll(enemies);
+         }
+          if(ship.ammo > 0) {
+            if(weaponCount == 1) {
+              lazers.add(new Lazer(ship.x, ship.y));
+              lazerCount++;
+              ship.ammo--;
+            } else if (weaponCount == 2) {
+              lazers.add(new Lazer(ship.x-30, ship.y));
+              lazers.add(new Lazer(ship.x+30, ship.y)); 
+              lazerCount++;
+              ship.ammo-=2;
+            } else if (weaponCount == 3) {
+              lazers.add(new Lazer(ship.x, ship.y));
+              lazers.add(new Lazer(ship.x-30, ship.y));
+              lazers.add(new Lazer(ship.x+30, ship.y));
+              lazerCount++;
+              ship.ammo-=3;
+            } else if (weaponCount == 4) {
+               lazers.add(new Lazer(ship.x-30, ship.y));
+               lazers.add(new Lazer(ship.x+30, ship.y));
+               lazers.add(new Lazer(ship.x-60, ship.y));
+               lazers.add(new Lazer(ship.x+60, ship.y));
+               lazerCount++;
+               ship.ammo-=4; 
+            }  else if (weaponCount == 5) {
+              lazers.add(new Lazer(ship.x, ship.y));
+              lazers.add(new Lazer(ship.x-30, ship.y));
+              lazers.add(new Lazer(ship.x+30, ship.y));
+              lazers.add(new Lazer(ship.x-60, ship.y));
+              lazers.add(new Lazer(ship.x+60, ship.y));
+              lazerCount++;
+              ship.ammo-=6;
+            } else if (weaponCount >= 7) {
+              lazers.add(new Lazer(ship.x, ship.y));
+              lazers.add(new Lazer(ship.x-30, ship.y));
+              lazers.add(new Lazer(ship.x+30, ship.y));
+              lazers.add(new Lazer(ship.x-60, ship.y));
+              lazers.add(new Lazer(ship.x+60, ship.y));
+              lazers.add(new Lazer(ship.x-90, ship.y));
+              lazers.add(new Lazer(ship.x+90, ship.y));
+              lazerCount++;
+              ship.ammo-=7;
+            }
+          }
+        } 
+        
+     void ticker() {
+       ticTimer.start();
+       ticker = true;
+       if (ticTimer.isFinished()) {
+         ticker = false;
+       }
+       
+       void startScreen() {
+         background(0);
+         textAlign(CENTER);
+         text("Welcome to the SpaceGame!", width/2, height/2);
+         text("Click to start the game...", width/2. height/2+20);
+         
+         if (mousePressed) {
+           play = true;
+         }
+       }
+       
+       void infoPanel() {
+         fill(128, 128);
+         rectMode(CORNER);
+         rect(0, height-50, width, 50);
+         fill(200);
+         textAlign(LEFT);
+         textSize(16);
+         text("Score: " + score, 10, height-30);
+         text("Health: " + ship.health, 130, height-30);
+         text("Level:" + level, 250, height-30);
+         text("Asteroids: " + asteroidCount, 310, height-30);
+         text("Pass: " + pass, 420. height-30);
+         text("Ammo: " + ship.ammo, 470, height-30);
+         text("SuperWeapon: " + superWeapon, 600, height-30);
+       }
+        
+         void gameOver() {
+           background(0);
+           textAlign(CENTER);
+           fill(222);
+           text("Game Over!", width/2, height/2);
+           text("Final Score: " + score, width/2, height/2+20);
+           text("You made it to level" + level, width/2, height/2+40);
+           noLoop();
+         }
