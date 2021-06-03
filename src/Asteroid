@@ -1,29 +1,23 @@
 class Asteroid {
-  //member variables
-  PImage asteroid;
-  int x, y, health, dia, speed, rad;
+  int x, y, speed, r, health, healthStart;
   char displayMode;
   color c;
 
   //constructor
   Asteroid(int x, int y) {
+    r= int(random(25, 60));
     this.x = x;
     this.y = y;
-    x=0;
-    y=0;
-    health = 50;
-    dia = 50;
     speed = int(random(1, 9));
-    rad = 25;
-    displayMode = '1';
-    c = #08FF43;
-      asteroid = loadImage("asteroid.png");
+    c = color(random(225), random(115), 225);
+      
   }
-
+         
   //Collision for Asteroid and Lazers
-  boolean asteroidIntersection(Lazer lazer) {
+  boolean lazerIntersection(Lazer lazer) {
     float distance = dist(x, y, lazer.x, lazer.y);
-    if (distance < rad+ lazer.rad) {
+    
+    if (distance < r+ lazer.r) {
       return true;
     } else {
       return false;
@@ -33,10 +27,13 @@ class Asteroid {
     y+=speed;
   }
 
-  //member methods
   void display() {
     fill(c);
-    //ellipse(x, y, dia, dia);
-    image(asteroid, x, y);
-  }
+    noStroke();
+    ellipse(x, y, health, health);
+    fill(255);
+    textSize(9);
+    textAlign(CENTER);
+    text(health, x, y);
+   }
 }
